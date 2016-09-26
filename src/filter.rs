@@ -171,21 +171,20 @@ impl Filter {
             let fg = ca[i].fg_colors();
             let bg = ca[i].bg_colors();
 
-            if fg.fg_eq(last_fg) && !bg.bg_eq(last_bg) {
-                continue;
+            if !fg.fg_eq(last_fg) || !bg.bg_eq(last_bg) {
+                if in_color {
+                    res.push_str(self.term.csi_reset());
+                    in_color = false;
+                }
+                res.push_str(fg.fg_code());
+                res.push_str(bg.bg_code());
+
+                last_fg = fg;
+                last_bg = bg;
+                in_color = true;
             }
-            if in_color {
-                res.push_str(self.term.csi_reset());
-                in_color = false;
-            }
-            res.push_str(fg.fg_code());
-            res.push_str(bg.bg_code());
-            in_color = true;
 
             res.push(line_bytes[i] as char);
-
-            last_fg = fg;
-            last_bg = bg;
         }
         if in_color {
             res.push_str(self.term.csi_reset());
