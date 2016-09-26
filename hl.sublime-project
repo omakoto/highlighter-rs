@@ -1,0 +1,14 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		},
+		{
+			"path": "src/highlighter"
+		},
+		{
+			"path": "src/bin"
+		}
+	]
+}

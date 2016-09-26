@@ -1,0 +1,325 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"is_",
+				"is_none"
+			],
+			[
+				"cons",
+				"console_width           FnArg (rule.rs) : console_width                            "
+			]
+		]
+	},
+	"build_system": "Packages/Rust/Rust.sublime-build",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/Rust/Cargo.sublime-build",
+					""
+				],
+				[
+					"Packages/Rust/Cargo.sublime-build",
+					"Run"
+				],
+				[
+					"Packages/Rust/Cargo.sublime-build",
+					"Test"
+				],
+				[
+					"Packages/Rust/Cargo.sublime-build",
+					"Bench"
+				],
+				[
+					"Packages/Rust/Cargo.sublime-build",
+					"Clean"
+				],
+				[
+					"Packages/Rust/Rust.sublime-build",
+					""
+				],
+				[
+					"Packages/Rust/Rust.sublime-build",
+					"Run"
+				]
+			],
+			[
+				"Packages/Rust/Rust.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 496.0,
+		"last_filter": "rust",
+		"selected_items":
+		[
+			[
+				"rust",
+				"BeautifyRust"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"install ",
+				"Package Control: Install Package"
+			],
+			[
+				"install pa",
+				"Package Control: Install Package"
+			],
+			[
+				"package",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 970.0
+	},
+	"console":
+	{
+		"height": 454.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/omakoto/cbin/src/rust/highlighter/src/highlighter/lib.rs",
+		"/home/omakoto/cbin/src/rust/highlighter/src/bin/main.rs",
+		"/home/omakoto/cbin/src/rust/highlighter/src/highlighter/rule.rs",
+		"/home/omakoto/cbin/src/rust/highlighter/rules/highlighter-logcat.toml",
+		"/home/omakoto/cbin/src/rust/highlighter/src/highlighter/rule_parser.rs",
+		"/home/omakoto/cbin/src/rust/highlighter/src/highlighter/term_color.rs",
+		"/home/omakoto/cbin/src/rust/highlighter/Cargo.toml",
+		"/home/omakoto/.config/sublime-text-3/Packages/BeautifyRust/BeautifyRust.sublime-settings",
+		"/home/omakoto/cbin/src/rust/highlighter/hl.sublime-project",
+		"/home/omakoto/cbin/src/rust/cheat/src/main.rs",
+		"/home/omakoto/cbin/.git/COMMIT_EDITMSG"
+	],
+	"find":
+	{
+		"height": 60.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"TomlError",
+			"ParseError",
+			"TomlError",
+			"InvalidToml",
+			"TomlError",
+			"ParseError",
+			"Color",
+			"rules",
+			"rule",
+			"raw_rule",
+			"rules_array",
+			"toml",
+			"={}\", ",
+			"rules_array",
+			"size",
+			"Root",
+			"None",
+			"toml",
+			"rules_array",
+			"as_slice",
+			"match",
+			"tml",
+			"Dumping",
+			"ParseError",
+			"ref",
+			"ParseError",
+			"TOML",
+			"TomlError",
+			"InvalidColor",
+			"Point",
+			"ParseError",
+			"Error",
+			"ParseError",
+			"term_color",
+			"fmt",
+			"panic",
+			"Error",
+			"TomlError",
+			"InvalidColor",
+			"panic",
+			"Error",
+			"ParseError",
+			"RuleParser",
+			"from_file",
+			"rule_file",
+			"table",
+			"pcred",
+			"config_parser",
+			"highlighter",
+			"exec",
+			"\n        ",
+			"toml",
+			"u16",
+			"opt_present",
+			"fullcolor",
+			"term_color",
+			"println",
+			"config",
+			"config_file",
+			"filename",
+			"String",
+			"DecorativeLine",
+			"line_colors",
+			"DecorativeLine",
+			"10",
+			"Copy",
+			"mark",
+			": ",
+			"i32",
+			"self",
+			"test_rule_parser"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": true,
+		"wrap": true
+	},
+	"incremental_find":
+	{
+		"height": 37.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 586.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/Rust/Rust.sublime-build",
+	"replace":
+	{
+		"height": 70.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"rulepa",
+				"highlighter/rule_parser.rs"
+			],
+			[
+				"string.rs",
+				"libcollections/string.rs"
+			],
+			[
+				"rule",
+				"src/highlighter/rule.rs"
+			],
+			[
+				"term_co",
+				"src/highlighter/term_color.rs"
+			],
+			[
+				"term",
+				"src/highlighter/term_color.rs"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 483.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
