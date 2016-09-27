@@ -75,7 +75,10 @@ fn run_single_threaded<T: Read>(reader: BufReader<T>, filter: &mut Filter, write
         match line {
             Err(e) => {
                 error(&format!("{}", e));
-                return;
+                match e.kind() {
+                    std::io::ErrorKind::InvalidData => continue, // OK
+                    _ => return,
+                }
             }
             Ok(s) => {
                 filter.process(&s, writer);
