@@ -12,9 +12,9 @@ use std::io;
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::env;
-use std::sync::mpsc::{SyncSender, Receiver};
-use std::sync::mpsc;
+use std::sync::mpsc::*;
 use std::thread;
+use std::sync::*;
 
 use fileinput::FileInput;
 
@@ -49,6 +49,10 @@ fn get_app<'a, 'b>() -> App<'a, 'b> {
             .short("f")
             .long("auto-flush")
             .help("Auto-flush stdout"))
+        .arg(Arg::with_name("multithread")
+            .short("m")
+            .long("multi-thread")
+            .help("Utilize multi-cores"))
         .arg(Arg::with_name("bashcomp")
             .long("bash-completion")
             .help("Print bash completion script"))
@@ -79,6 +83,44 @@ fn run_single_threaded<T: Read>(reader: BufReader<T>, filter: &mut Filter, write
         }
     }
 }
+
+// fn run_multi_threaded<T: Read+Sync>(reader: BufReader<T>, filter: Filter, writer: &Fn(&str)) {
+//     let (r_tx, r_rx) = sync_channel(1);
+//     let (w_tx, w_rx) = sync_channel(1);
+
+//     // let mr = Mutex::new(reader);
+//     // let mf = Mutex::new(filter);
+
+//     let r = thread::spawn(|| {
+//         for line in reader.lines() {
+//             if let Ok(l) = line {
+//                 if r_tx.send(l).is_err() {
+//                     return;
+//                 }
+//             }
+//         }
+//     });
+//     let f = thread::spawn(|| {
+//         loop {
+//             match r_rx.recv() {
+//                 Ok(l) => filter.process(&l, |l| {
+//                     if w_tx.send(l).is_err() {
+//                         panic!();
+//                     }
+//                 }),
+//                 _ => return,
+//             }
+//         }
+//     });
+//     loop {
+//         match w_rx.recv() {
+//             Ok(l) => writer(l),
+//             _ => return,
+//         }
+//     }
+//     r.join().unwrap();
+//     f.join().unwrap();
+// }
 
 fn main() {
     env_logger::init().unwrap();
