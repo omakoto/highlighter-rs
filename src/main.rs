@@ -66,6 +66,20 @@ fn get_app<'a, 'b>() -> App<'a, 'b> {
             .help("Input files"))
 }
 
+fn run_single_threaded<T: Read>(reader: BufReader<T>, filter: &mut Filter, writer: &Fn(&str)) {
+    for line in reader.lines() {
+        match line {
+            Err(e) => {
+                error(&format!("{}", e));
+                return;
+            }
+            Ok(s) => {
+                filter.process(&s, writer);
+            }
+        }
+    }
+}
+
 fn main() {
     env_logger::init().unwrap();
 
@@ -108,18 +122,10 @@ fn main() {
     let fileinput = FileInput::new(&files);
     let reader = BufReader::new(fileinput);
 
-    for line in reader.lines() {
-        match line {
-            Err(e) => {
-                error(&format!("{}", e));
-                return;
-            }
-            Ok(s) => {
-                filter.process(&s, |out| println!("{}", out));
-            }
-        }
+    run_single_threaded(reader, &mut filter, &move |out| {
+        println!("{}", out);
         if auto_flush {
             io::stdout().flush();
         }
-    }
+    });
 }
