@@ -321,7 +321,7 @@ line_color = '555/023'
 # Hide SQL prepare
 [[rule]]
 pattern = '''\bSQLiteConnection: prepare\b'''
-line_color = '111'
+line_color = '444444'
 stop = true
 
 [[rule]]
@@ -392,8 +392,8 @@ color = '055'
 
 [[rule]]
 pattern = '''(?:\d D |\bD[\/\(])'''
-line_color = '333'
+line_color = '888888'
 
 [[rule]]
 pattern = '''(?:\d V |\bV[\/\(])'''
-line_color = '222'
+line_color = '555555'
