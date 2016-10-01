@@ -69,7 +69,7 @@ fn test_build_decorative_line() {
 #[derive(Debug)]
 struct PcreEx {
     pattern: String,
-    re: RefCell<Pcre>,
+    re: Pcre,
     negate: bool,
 }
 
@@ -88,13 +88,13 @@ impl PcreEx {
 
         Ok(PcreEx {
             pattern: orig_pattern.to_string(),
-            re: RefCell::new(re),
+            re: re,
             negate: negate,
         })
     }
 
     fn test(&self, line: &str) -> bool {
-        let mut ret = self.re.borrow_mut().exec(line).is_some();
+        let mut ret = self.re.exec(line).is_some();
         if self.negate {
             ret = !ret;
         }
@@ -109,10 +109,9 @@ impl PcreEx {
                 return vec![];
             }
         }
-        let mut re_mut = self.re.borrow_mut();
-        let cc = re_mut.capture_count();
+        let cc = self.re.capture_count();
         let mut ret = vec![];
-        for m in re_mut.matches(line) {
+        for m in self.re.matches(line) {
             let mut pusher = |i| {
                 if m.group_len(i) > 0 {
                     ret.push((m.group_start(i), m.group_end(i)))
