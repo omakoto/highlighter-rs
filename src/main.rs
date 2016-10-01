@@ -54,7 +54,8 @@ fn get_app<'a, 'b>() -> App<'a, 'b> {
             .long(FLAG_SIMPLE_RULE)
             .takes_value(true)
             .multiple(true)
-            .help("Specify [pattern]=[color]"))
+            .help("Add a simple rule: RE=(colors)(@colors) \
+                e.g. '\\d+=500/222@/cyan'"))
         .arg(Arg::with_name(FLAG_RULEFILE)
             .short("r")
             .long(FLAG_RULEFILE)
@@ -62,7 +63,7 @@ fn get_app<'a, 'b>() -> App<'a, 'b> {
             .multiple(true)
             .help("Specify TOML rule file"))
         .arg(Arg::with_name(FLAG_LEGACY_RULEFILE)
-            .short("l")
+            .short("c")
             .long(FLAG_LEGACY_RULEFILE)
             .takes_value(true)
             .multiple(true)
@@ -105,44 +106,6 @@ fn run_single_threaded<T: Read>(reader: BufReader<T>, filter: &mut Filter, write
     }
 }
 
-// fn run_multi_threaded<T: Read+Sync>(reader: BufReader<T>, filter: Filter, writer: &Fn(&str)) {
-//     let (r_tx, r_rx) = sync_channel(1);
-//     let (w_tx, w_rx) = sync_channel(1);
-
-//     // let mr = Mutex::new(reader);
-//     // let mf = Mutex::new(filter);
-
-//     let r = thread::spawn(|| {
-//         for line in reader.lines() {
-//             if let Ok(l) = line {
-//                 if r_tx.send(l).is_err() {
-//                     return;
-//                 }
-//             }
-//         }
-//     });
-//     let f = thread::spawn(|| {
-//         loop {
-//             match r_rx.recv() {
-//                 Ok(l) => filter.process(&l, |l| {
-//                     if w_tx.send(l).is_err() {
-//                         panic!();
-//                     }
-//                 }),
-//                 _ => return,
-//             }
-//         }
-//     });
-//     loop {
-//         match w_rx.recv() {
-//             Ok(l) => writer(l),
-//             _ => return,
-//         }
-//     }
-//     r.join().unwrap();
-//     f.join().unwrap();
-// }
-
 fn real_main() -> Result<(), String> {
     env_logger::init().unwrap();
 
@@ -176,6 +139,11 @@ fn real_main() -> Result<(), String> {
     if let Some(args) = matches.values_of(FLAG_RULEFILE) {
         for arg in args {
             try!(parser.parse_toml(arg, &mut rules).map_err(|e| e.description().to_string()));
+        }
+    }
+    if let Some(args) = matches.values_of(FLAG_LEGACY_RULEFILE) {
+        for arg in args {
+            try!(parser.parse_legacy(arg, &mut rules).map_err(|e| e.description().to_string()));
         }
     }
     if let Some(args) = matches.values_of(FLAG_SIMPLE_RULE) {

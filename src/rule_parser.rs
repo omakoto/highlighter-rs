@@ -276,7 +276,10 @@ impl RuleParser {
         let (color_raw, line_color_raw) = rest.split_at(sep);
         let color = color_raw.trim();
         let line_color = line_color_raw.trim_left_matches('@').trim();
-        debug!("  pattern={}, color={}, line_color={}", pattern, color, line_color);
+        debug!("  pattern={}, color={}, line_color={}",
+               pattern,
+               color,
+               line_color);
 
         let mut rule = try!(Rule::new(&pattern));
 
@@ -302,7 +305,35 @@ impl RuleParser {
         let file = BufReader::new(try!(File::open(&filename)
             .map_err(|e| RuleError::new(&format!("Unable to open file '{}'", filename)))));
 
-        for line in file.lines() {
+        let mut line_no = 0;
+        for line_res in file.lines() {
+            line_no += 1;
+
+            if let Err(e) = line_res {
+                return Err(RuleError::new(&format!("Error reading from '{}': {}",
+                                                   filename,
+                                                   e)));
+            }
+            let line = line_res.unwrap().trim().to_string();
+
+            if line.starts_with('/') || line.starts_with('#') {
+                continue;
+            }
+            let key;
+            let value;
+            if let Some(p) = line.find('=') {
+                key = &line[0..p];
+                value = &line[p+1..line.len()];
+            } else {
+                key = &line;
+                value = &"";
+            }
+
+            // let (key, value_raw) = p.split_at(sep);
+
+
+
+
         }
         Ok(())
     }
@@ -462,53 +493,52 @@ fn test_parse_simple_rule() {
     assert_eq!("a", r.pattern());
     assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Console(1), bg: None, \
         fg_code: \"\\u{1b}[1m\\u{1b}[31m\", bg_code: \"\" })",
-        format!("{:?}", r.match_colors()));
+               format!("{:?}", r.match_colors()));
     assert_eq!("None", format!("{:?}", r.line_colors()));
 
     let r = p.parse_simple_rule("a").unwrap();
     assert_eq!("a", r.pattern());
     assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Console(1), bg: None, \
         fg_code: \"\\u{1b}[1m\\u{1b}[31m\", bg_code: \"\" })",
-        format!("{:?}", r.match_colors()));
+               format!("{:?}", r.match_colors()));
     assert_eq!("None", format!("{:?}", r.line_colors()));
 
     let r = p.parse_simple_rule("a=333").unwrap();
     assert_eq!("a", r.pattern());
     assert_eq!("Some(Colors { attrs: , fg: Rgb(153, 153, 153), bg: None, \
         fg_code: \"\\u{1b}[38;5;145m\", bg_code: \"\" })",
-        format!("{:?}", r.match_colors()));
+               format!("{:?}", r.match_colors()));
     assert_eq!("None", format!("{:?}", r.line_colors()));
 
     let r = p.parse_simple_rule("a=333/red").unwrap();
     assert_eq!("a", r.pattern());
     assert_eq!("Some(Colors { attrs: , fg: Rgb(153, 153, 153), bg: Console(1), \
         fg_code: \"\\u{1b}[38;5;145m\", bg_code: \"\\u{1b}[41m\" })",
-        format!("{:?}", r.match_colors()));
+               format!("{:?}", r.match_colors()));
     assert_eq!("None", format!("{:?}", r.line_colors()));
 
     let r = p.parse_simple_rule("a=/red").unwrap();
     assert_eq!("a", r.pattern());
     assert_eq!("Some(Colors { attrs: , fg: None, bg: Console(1), \
         fg_code: \"\", bg_code: \"\\u{1b}[41m\" })",
-        format!("{:?}", r.match_colors()));
+               format!("{:?}", r.match_colors()));
     assert_eq!("None", format!("{:?}", r.line_colors()));
 
     let r = p.parse_simple_rule("a=333@444").unwrap();
     assert_eq!("a", r.pattern());
     assert_eq!("Some(Colors { attrs: , fg: Rgb(153, 153, 153), bg: None, \
         fg_code: \"\\u{1b}[38;5;145m\", bg_code: \"\" })",
-        format!("{:?}", r.match_colors()));
+               format!("{:?}", r.match_colors()));
     assert_eq!("Some(Colors { attrs: , fg: Rgb(204, 204, 204), bg: None, \
         fg_code: \"\\u{1b}[38;5;188m\", bg_code: \"\" })",
-        format!("{:?}", r.line_colors()));
+               format!("{:?}", r.line_colors()));
 
     let r = p.parse_simple_rule("a=@444").unwrap();
     assert_eq!("a", r.pattern());
-    assert_eq!("None",
-        format!("{:?}", r.match_colors()));
+    assert_eq!("None", format!("{:?}", r.match_colors()));
     assert_eq!("Some(Colors { attrs: , fg: Rgb(204, 204, 204), bg: None, \
         fg_code: \"\\u{1b}[38;5;188m\", bg_code: \"\" })",
-        format!("{:?}", r.line_colors()));
+               format!("{:?}", r.line_colors()));
 }
 
 
