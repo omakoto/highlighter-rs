@@ -313,20 +313,41 @@ impl RuleParser {
         Ok(rule)
     }
 
-    pub fn parse_legacy(&self, filename: &str, rules: &mut Vec<Rule>) -> Result<(), RuleError> {
+    pub fn parse_legacy(&self, filename: &str, mut rules: &mut Vec<Rule>) -> Result<(), RuleError> {
         debug!("Reading legacy rule file from {}...", filename);
 
         let file = BufReader::new(try!(File::open(&filename)
             .map_err(|e| RuleError::new(&format!("Unable to open file '{}'", filename)))));
 
-        let mut rule: Option<Rule> = None;
+        struct State {
+            rule: Option<Rule>,
 
-        let mut pre_line: Option<String> = None;
-        let mut pre_line_color: Option<Colors> = None;
-        let mut post_line: Option<String> = None;
-        let mut post_line_color: Option<Colors> = None;
+            pre_line: Option<String>,
+            pre_line_color: Option<Colors>,
+            post_line: Option<String>,
+            post_line_color: Option<Colors>,
+        }
 
-        let push_rule
+        impl State {
+            fn add_rule(&mut self, rules: &mut Vec<Rule>) {
+                if let Some(ref r) = self.rule {
+                    rules.push(r.clone());
+                }
+                self.rule = None;
+                self.pre_line = None;
+                self.pre_line_color = None;
+                self.post_line = None;
+                self.post_line_color = None;
+            }
+        }
+
+        let mut state = State {
+            rule: None,
+            pre_line: None,
+            pre_line_color: None,
+            post_line: None,
+            post_line_color: None,
+        };
 
         let mut line_no = 0;
         for line_res in file.lines() {
@@ -337,7 +358,7 @@ impl RuleParser {
             }
             let line = line_res.unwrap().trim().to_string();
 
-            if line.starts_with('/') || line.starts_with('#') {
+            if line.len() == 0 || line.starts_with('/') || line.starts_with('#') {
                 continue;
             }
             // Split with '='.
@@ -351,20 +372,15 @@ impl RuleParser {
                 value = &"";
             }
 
+            debug!("  {}={}", key, value);
+
             if key == "pattern" {
-                if let Some(r) = rule {
-                    rules.push(r);
-                    rule = None;
-                    pre_line = None;
-                    pre_line_color = None;
-                    post_line = None;
-                    post_line_color = None;
-                }
-                rule = Some(try!(Rule::new(&value)));
+                state.add_rule(&mut rules);
+                state.rule = Some(try!(Rule::new(&value)));
                 continue;
             }
 
-            if rule.is_none() {
+            if state.rule.is_none() {
                 return Err(RuleError::new(&format!("Error reading from '{}': file must start \
                                                     with 'pattern' ",
                                                    filename)));
@@ -372,34 +388,36 @@ impl RuleParser {
 
             match key {
                 ".when" => {
-                    try!(rule.as_mut().unwrap().set_when(value.to_string()));
+                    try!(state.rule.as_mut().unwrap().set_when(value.to_string()));
                 }
                 ".states" => {
-                    // rule.set_states(value.to_string());
+                    // state.rule.set_states(value.to_string());
                 }
-                ".next_state" => {rule.as_mut().unwrap().set_next_state(value.to_string());}
+                ".next_state" => {
+                    state.rule.as_mut().unwrap().set_next_state(value.to_string());
+                }
                 ".color" => {
                     let c = try!(self.color_parser.parse(value));
-                    rule.as_mut().unwrap().set_match_colors(c);
+                    state.rule.as_mut().unwrap().set_match_colors(c);
+                }
+                ".stop" => {
+                    state.rule.as_mut().unwrap().set_stop(true);
                 }
                 ".line_color" => {
                     let c = try!(self.color_parser.parse(value));
-                    rule.as_mut().unwrap().set_line_colors(c);
+                    state.rule.as_mut().unwrap().set_line_colors(c);
                 }
                 ".pre_line" => {
-                    pre_line = value;
+                    state.pre_line = Some(value.to_string());
                 }
                 ".pre_line_color" => {
-                    pre_line_color = try!(self.color_parser.parse(value));
+                    state.pre_line_color = Some(try!(self.color_parser.parse(value)));
                 }
                 ".post_line" => {
-                    post_line = value;
+                    state.post_line = Some(value.to_string());
                 }
                 ".post_line_color" => {
-                    post_line_color = try!(self.color_parser.parse(value));
-                }
-                ".stop" => {
-                    rule.as_mut().unwrap().set_stop(true);
+                    state.post_line_color = Some(try!(self.color_parser.parse(value)));
                 }
                 _ => {
                     return Err(RuleError::new(&format!("Error reading from '{}': Invalid key \
@@ -409,6 +427,7 @@ impl RuleParser {
                 }
             }
         }
+        state.add_rule(&mut rules);
         Ok(())
     }
 
