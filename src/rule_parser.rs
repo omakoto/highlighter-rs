@@ -321,6 +321,11 @@ impl RuleParser {
 
         let mut rule: Option<Rule> = None;
 
+        let mut pre_line: Option<String> = None;
+        let mut pre_line_color: Option<Colors> = None;
+        let mut post_line: Option<String> = None;
+        let mut post_line_color: Option<Colors> = None;
+
         let mut line_no = 0;
         for line_res in file.lines() {
             line_no += 1;
@@ -345,6 +350,14 @@ impl RuleParser {
             }
 
             if key == "pattern" {
+                if let Some(r) = rule {
+                    rules.push(r);
+                    rule = None;
+                    pre_line = None;
+                    pre_line_color = None;
+                    post_line = None;
+                    post_line_color = None;
+                }
                 rule = Some(try!(Rule::new(&value)));
                 continue;
             }
@@ -377,7 +390,9 @@ impl RuleParser {
                 ".pre_line_color" => {}
                 ".post_line" => {}
                 ".post_line_color" => {}
-                ".stop" => {}
+                ".stop" => {
+                    rule.as_mut().unwrap().set_stop(true);
+                }
                 _ => {
                     return Err(RuleError::new(&format!("Error reading from '{}': Invalid key \
                                                         '{}'",
