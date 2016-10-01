@@ -15,10 +15,12 @@ use std::env;
 use std::sync::mpsc::*;
 use std::thread;
 use std::sync::*;
+use std::error::Error;
 
 use fileinput::FileInput;
 
 use highlighter::*;
+use highlighter::rule::*;
 use highlighter::term_color::*;
 use highlighter::rule_parser::*;
 use highlighter::filter::*;
@@ -34,31 +36,37 @@ fn error(message: &String) {
 //     error(&opts.usage(&format!("Usage: {} CONFIG [Files...]", program)));
 // }
 
-const FLAG_AUTO_FLUSH: &'static str = "auto-flush ";
-const FLAG_BASHCOMP: &'static str = "bash-completion ";
-const FLAG_PATTERN: &'static str = "pattern ";
-const FLAG_RULEFILE: &'static str = "rulefile ";
-const FLAG_WIDTH: &'static str = "width ";
-const FLAG_FILES: &'static str = "files ";
+const FLAG_AUTO_FLUSH: &'static str = "auto-flush";
+const FLAG_BASHCOMP: &'static str = "bash-completion";
+const FLAG_SIMPLE_RULE: &'static str = "pattern";
+const FLAG_RULEFILE: &'static str = "rulefile";
+const FLAG_LEGACY_RULEFILE: &'static str = "legacyfile";
+const FLAG_WIDTH: &'static str = "width";
+const FLAG_FILES: &'static str = "files";
 
 fn get_app<'a, 'b>() -> App<'a, 'b> {
     App::new("Hilighter")
         .version("0.1")
         .author("Makoto Onuki <makoto.onuki@gmail.com>")
         .about("Regex based text highlighter")
-        .arg(Arg::with_name(FLAG_PATTERN)
+        .arg(Arg::with_name(FLAG_SIMPLE_RULE)
             .short("p")
-            .long(FLAG_PATTERN)
+            .long(FLAG_SIMPLE_RULE)
             .takes_value(true)
             .multiple(true)
             .help("Specify [pattern]=[color]"))
         .arg(Arg::with_name(FLAG_RULEFILE)
             .short("r")
-            .long("rule")
+            .long(FLAG_RULEFILE)
             .takes_value(true)
-            .required_unless(FLAG_PATTERN)
-            .required_unless(FLAG_BASHCOMP)
-            .help("Specify rule file"))
+            .multiple(true)
+            .help("Specify TOML rule file"))
+        .arg(Arg::with_name(FLAG_LEGACY_RULEFILE)
+            .short("l")
+            .long(FLAG_LEGACY_RULEFILE)
+            .takes_value(true)
+            .multiple(true)
+            .help("Specify legacy file"))
         .arg(Arg::with_name("autoflush")
             .short("f")
             .long("auto-flush")
@@ -135,13 +143,13 @@ fn run_single_threaded<T: Read>(reader: BufReader<T>, filter: &mut Filter, write
 //     f.join().unwrap();
 // }
 
-fn main() {
+fn real_main() -> Result<(), String> {
     env_logger::init().unwrap();
 
     let matches = get_app().get_matches();
     if matches.is_present(FLAG_BASHCOMP) {
         get_app().gen_completions_to("hl", Shell::Bash, &mut io::stdout());
-        std::process::exit(0);
+        return Ok(());
     }
 
     let args: Vec<String> = env::args().collect();
@@ -150,15 +158,9 @@ fn main() {
     let width = value_t!(matches, FLAG_WIDTH, usize).unwrap();
     let auto_flush = matches.is_present("autoflush");
     let mut files: Vec<String> = vec![];
-    if let Some(arg) = matches.values_of(FLAG_FILES) {
-        for f in arg {
-            files.push(f.to_string());
-        }
-    }
-    let mut patterns: Vec<String> = vec![];
-    if let Some(arg) = matches.values_of(FLAG_PATTERN) {
-        for f in arg {
-            patterns.push(f.to_string());
+    if let Some(args) = matches.values_of(FLAG_FILES) {
+        for arg in args {
+            files.push(arg.to_string());
         }
     }
 
@@ -166,19 +168,25 @@ fn main() {
     let term = Term::detect();
     debug!("Detected terminal: {:?}", &term);
 
+    // Parse rules.
     let mut parser = RuleParser::new(term, width);
-    let parse_result = if patterns.len() > 0 {
-        parser.parse_from_args(&patterns)
-    } else {
-        parser.parse(&(matches.value_of(FLAG_RULEFILE).unwrap()).to_string())
-    };
-    let rules = match parse_result {
-        Err(e) => {
-            error(&format!("{}", e));
-            std::process::exit(1);
+
+    let mut rules: Vec<Rule> = vec![];
+
+    if let Some(args) = matches.values_of(FLAG_RULEFILE) {
+        for arg in args {
+            try!(parser.parse_toml(arg, &mut rules).map_err(|e| e.description().to_string()));
         }
-        Ok(v) => v,
-    };
+    }
+    if let Some(args) = matches.values_of(FLAG_SIMPLE_RULE) {
+        for arg in args {
+            rules.push(try!(parser.parse_simple_rule(arg).map_err(|e| e.description().to_string())));
+        }
+    }
+
+    if rules.len() == 0 {
+        return Err("No rules specified.".to_string());
+    }
 
     // Create the filter
     let mut filter = Filter::new(term, rules);
@@ -187,10 +195,23 @@ fn main() {
     let fileinput = FileInput::new(&files);
     let reader = BufReader::new(fileinput);
 
-    run_single_threaded(reader, &mut filter, &move |out| {
-        println!("{}", out);
-        if auto_flush {
-            io::stdout().flush();
+    run_single_threaded(reader,
+                        &mut filter,
+                        &move |out| {
+                            println!("{}", out);
+                            if auto_flush {
+                                io::stdout().flush();
+                            }
+                        });
+    Ok(())
+}
+
+fn main() {
+    match real_main() {
+        Ok(_) => return, // okay
+        Err(err) => {
+            error(&err);
+            std::process::exit(1);
         }
-    });
+    }
 }

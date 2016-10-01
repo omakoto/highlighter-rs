@@ -265,11 +265,37 @@ impl RuleParser {
         Err(RuleError::new(&format!("Missing key '{}'.", key)))
     }
 
-    pub fn parse_from_args(&mut self, filename: &Vec<String>) -> Result<Vec<Rule>, RuleError> {
-        unimplemented!();
+    pub fn parse_simple_rule(&mut self, p: &str) -> Result<Rule, RuleError> {
+        let sep = p.rfind('=').unwrap_or(p.len());
+        let (pattern, rest_raw) = p.split_at(sep);
+        if pattern.len() == 0 {
+            return Err(RuleError::new("Pattern can't be empty."));
+        }
+        let rest = rest_raw.trim_left_matches('=').trim();
+
+        let sep = rest.rfind('@').unwrap_or(rest.len());
+        let (color_raw, line_color_raw) = rest.split_at(sep);
+        let color = color_raw.trim();
+        let line_color = line_color_raw.trim_left_matches('@').trim();
+        debug!("  pattern={}, color={}, line_color={}", pattern, color, line_color);
+
+        let mut rule = try!(Rule::new(&pattern));
+
+        if color.len() > 0 {
+            let c = try!(self.color_parser.parse(color));
+            rule.set_match_colors(c);
+        } else {
+            rule.set_match_colors(self.color_parser.parse("bred").unwrap());
+        }
+        if line_color.len() > 0 {
+            let c = try!(self.color_parser.parse(line_color));
+            rule.set_line_colors(c);
+        }
+        debug!("rule={:?}", rule);
+        Ok(rule)
     }
 
-    pub fn parse(&mut self, filename: &String) -> Result<Vec<Rule>, RuleError> {
+    pub fn parse_toml(&mut self, filename: &str, rules: &mut Vec<Rule>) -> Result<(), RuleError> {
         debug!("Reading rule file from {}...", filename);
 
         // Load file content.
@@ -319,7 +345,6 @@ impl RuleParser {
             _ => return Err(RuleError::new("Invalid TOML: No [[rule]]s found.")),
         };
 
-        let mut rules = vec![];
         debug!("# rules={}", rules_array.len());
 
         debug!("Rules count={}", rules_array.len());
@@ -406,7 +431,7 @@ impl RuleParser {
             rules.push(rule);
         }
 
-        Ok(rules)
+        Ok(())
     }
 }
 
