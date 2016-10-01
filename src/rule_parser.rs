@@ -264,18 +264,32 @@ impl RuleParser {
         Err(RuleError::new(&format!("Missing key '{}'.", key)))
     }
 
-    pub fn parse_simple_rule(&self, p: &str) -> Result<Rule, RuleError> {
-        let sep = p.rfind('=').unwrap_or(p.len());
-        let (pattern, rest_raw) = p.split_at(sep);
+    pub fn parse_simple_rule(&self, value: &str) -> Result<Rule, RuleError> {
+        // Split with "="
+        let pattern;
+        let rest;
+        if let Some(p) = value.rfind('=') {
+            pattern = &value[0..p];
+            rest = &value[p + 1..value.len()];
+        } else {
+            pattern = &value;
+            rest = &"";
+        }
         if pattern.len() == 0 {
             return Err(RuleError::new("Pattern can't be empty."));
         }
-        let rest = rest_raw.trim_left_matches('=').trim();
 
-        let sep = rest.rfind('@').unwrap_or(rest.len());
-        let (color_raw, line_color_raw) = rest.split_at(sep);
-        let color = color_raw.trim();
-        let line_color = line_color_raw.trim_left_matches('@').trim();
+        // Split the right-hand side with "@"
+        let color;
+        let line_color;
+        if let Some(p) = rest.find('@') {
+            color = &rest[0..p];
+            line_color = &rest[p + 1..rest.len()];
+        } else {
+            color = &rest;
+            line_color = &"";
+        }
+
         debug!("  pattern={}, color={}, line_color={}",
                pattern,
                color,
@@ -305,35 +319,72 @@ impl RuleParser {
         let file = BufReader::new(try!(File::open(&filename)
             .map_err(|e| RuleError::new(&format!("Unable to open file '{}'", filename)))));
 
+        let mut rule: Option<Rule> = None;
+
         let mut line_no = 0;
         for line_res in file.lines() {
             line_no += 1;
 
             if let Err(e) = line_res {
-                return Err(RuleError::new(&format!("Error reading from '{}': {}",
-                                                   filename,
-                                                   e)));
+                return Err(RuleError::new(&format!("Error reading from '{}': {}", filename, e)));
             }
             let line = line_res.unwrap().trim().to_string();
 
             if line.starts_with('/') || line.starts_with('#') {
                 continue;
             }
+            // Split with '='.
             let key;
             let value;
             if let Some(p) = line.find('=') {
-                key = &line[0..p];
-                value = &line[p+1..line.len()];
+                key = line[0..p].trim();
+                value = line[p + 1..line.len()].trim();
             } else {
                 key = &line;
                 value = &"";
             }
 
-            // let (key, value_raw) = p.split_at(sep);
+            if key == "pattern" {
+                rule = Some(try!(Rule::new(&value)));
+                continue;
+            }
 
+            if rule.is_none() {
+                return Err(RuleError::new(&format!("Error reading from '{}': file must start \
+                                                    with 'pattern' ",
+                                                   filename)));
+            }
 
-
-
+            match key {
+                ".when" => {
+                    try!(rule.as_mut().unwrap().set_when(value.to_string()));
+                }
+                ".states" => {
+                    // rule.set_states(value.to_string());
+                }
+                ".next_state" => {rule.as_mut().unwrap().set_next_state(value.to_string());}
+                ".color" => {
+                    let c = try!(self.color_parser.parse(value));
+                    rule.as_mut().unwrap().set_match_colors(c);
+                }
+                ".line_color" => {
+                    let c = try!(self.color_parser.parse(value));
+                    rule.as_mut().unwrap().set_line_colors(c);
+                }
+                ".pre_line" => {
+                    // Grr...
+                }
+                ".pre_line_color" => {}
+                ".post_line" => {}
+                ".post_line_color" => {}
+                ".stop" => {}
+                _ => {
+                    return Err(RuleError::new(&format!("Error reading from '{}': Invalid key \
+                                                        '{}'",
+                                                       filename,
+                                                       key)));
+                }
+            }
         }
         Ok(())
     }

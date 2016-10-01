@@ -141,11 +141,12 @@ fn real_main() -> Result<(), String> {
             try!(parser.parse_toml(arg, &mut rules).map_err(|e| e.description().to_string()));
         }
     }
-    if let Some(args) = matches.values_of(FLAG_LEGACY_RULEFILE) {
-        for arg in args {
-            try!(parser.parse_legacy(arg, &mut rules).map_err(|e| e.description().to_string()));
-        }
-    }
+    // TODO
+    // if let Some(args) = matches.values_of(FLAG_LEGACY_RULEFILE) {
+    //     for arg in args {
+    //         try!(parser.parse_legacy(arg, &mut rules).map_err(|e| e.description().to_string()));
+    //     }
+    // }
     if let Some(args) = matches.values_of(FLAG_SIMPLE_RULE) {
         for arg in args {
             rules.push(try!(parser.parse_simple_rule(arg).map_err(|e| e.description().to_string())));
