@@ -56,7 +56,6 @@ impl ColorParser {
         }
     }
 
-
     fn get_group(m: &Match, i: usize) -> String {
         if m.group_len(i) == 0 {
             String::new()
@@ -145,7 +144,7 @@ impl ColorParser {
         Color::None
     }
 
-    fn parse(&mut self, value: &str) -> Result<Colors, RuleError> {
+    fn parse(&self, value: &str) -> Result<Colors, RuleError> {
         let m = match self.re.exec(&value) {
             None => return Err(RuleError::new(&format!("Invalid color: {}", value))),
             Some(m) => m,
@@ -265,7 +264,7 @@ impl RuleParser {
         Err(RuleError::new(&format!("Missing key '{}'.", key)))
     }
 
-    pub fn parse_simple_rule(&mut self, p: &str) -> Result<Rule, RuleError> {
+    pub fn parse_simple_rule(&self, p: &str) -> Result<Rule, RuleError> {
         let sep = p.rfind('=').unwrap_or(p.len());
         let (pattern, rest_raw) = p.split_at(sep);
         if pattern.len() == 0 {
@@ -284,19 +283,32 @@ impl RuleParser {
         if color.len() > 0 {
             let c = try!(self.color_parser.parse(color));
             rule.set_match_colors(c);
-        } else {
-            rule.set_match_colors(self.color_parser.parse("bred").unwrap());
         }
         if line_color.len() > 0 {
             let c = try!(self.color_parser.parse(line_color));
             rule.set_line_colors(c);
         }
+        if color.len() == 0 && line_color.len() == 0 {
+            rule.set_match_colors(self.color_parser.parse("bred").unwrap());
+        }
+
         debug!("rule={:?}", rule);
         Ok(rule)
     }
 
-    pub fn parse_toml(&mut self, filename: &str, rules: &mut Vec<Rule>) -> Result<(), RuleError> {
-        debug!("Reading rule file from {}...", filename);
+    pub fn parse_legacy(&self, filename: &str, rules: &mut Vec<Rule>) -> Result<(), RuleError> {
+        debug!("Reading legacy rule file from {}...", filename);
+
+        let file = BufReader::new(try!(File::open(&filename)
+            .map_err(|e| RuleError::new(&format!("Unable to open file '{}'", filename)))));
+
+        for line in file.lines() {
+        }
+        Ok(())
+    }
+
+    pub fn parse_toml(&self, filename: &str, rules: &mut Vec<Rule>) -> Result<(), RuleError> {
+        debug!("Reading toml rule file from {}...", filename);
 
         // Load file content.
         let mut rule = String::new();
@@ -437,9 +449,68 @@ impl RuleParser {
 
 #[test]
 fn test_rule_parser() {
-
-    let parser = RuleParser::new(Term::Xterm, 80);
+    let p = RuleParser::new(Term::Xterm, 80);
 }
+
+#[test]
+fn test_parse_simple_rule() {
+    let mut p = RuleParser::new(Term::Xterm, 80);
+
+    assert!(p.parse_simple_rule("=").is_err());
+
+    let r = p.parse_simple_rule("a=").unwrap();
+    assert_eq!("a", r.pattern());
+    assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Console(1), bg: None, \
+        fg_code: \"\\u{1b}[1m\\u{1b}[31m\", bg_code: \"\" })",
+        format!("{:?}", r.match_colors()));
+    assert_eq!("None", format!("{:?}", r.line_colors()));
+
+    let r = p.parse_simple_rule("a").unwrap();
+    assert_eq!("a", r.pattern());
+    assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Console(1), bg: None, \
+        fg_code: \"\\u{1b}[1m\\u{1b}[31m\", bg_code: \"\" })",
+        format!("{:?}", r.match_colors()));
+    assert_eq!("None", format!("{:?}", r.line_colors()));
+
+    let r = p.parse_simple_rule("a=333").unwrap();
+    assert_eq!("a", r.pattern());
+    assert_eq!("Some(Colors { attrs: , fg: Rgb(153, 153, 153), bg: None, \
+        fg_code: \"\\u{1b}[38;5;145m\", bg_code: \"\" })",
+        format!("{:?}", r.match_colors()));
+    assert_eq!("None", format!("{:?}", r.line_colors()));
+
+    let r = p.parse_simple_rule("a=333/red").unwrap();
+    assert_eq!("a", r.pattern());
+    assert_eq!("Some(Colors { attrs: , fg: Rgb(153, 153, 153), bg: Console(1), \
+        fg_code: \"\\u{1b}[38;5;145m\", bg_code: \"\\u{1b}[41m\" })",
+        format!("{:?}", r.match_colors()));
+    assert_eq!("None", format!("{:?}", r.line_colors()));
+
+    let r = p.parse_simple_rule("a=/red").unwrap();
+    assert_eq!("a", r.pattern());
+    assert_eq!("Some(Colors { attrs: , fg: None, bg: Console(1), \
+        fg_code: \"\", bg_code: \"\\u{1b}[41m\" })",
+        format!("{:?}", r.match_colors()));
+    assert_eq!("None", format!("{:?}", r.line_colors()));
+
+    let r = p.parse_simple_rule("a=333@444").unwrap();
+    assert_eq!("a", r.pattern());
+    assert_eq!("Some(Colors { attrs: , fg: Rgb(153, 153, 153), bg: None, \
+        fg_code: \"\\u{1b}[38;5;145m\", bg_code: \"\" })",
+        format!("{:?}", r.match_colors()));
+    assert_eq!("Some(Colors { attrs: , fg: Rgb(204, 204, 204), bg: None, \
+        fg_code: \"\\u{1b}[38;5;188m\", bg_code: \"\" })",
+        format!("{:?}", r.line_colors()));
+
+    let r = p.parse_simple_rule("a=@444").unwrap();
+    assert_eq!("a", r.pattern());
+    assert_eq!("None",
+        format!("{:?}", r.match_colors()));
+    assert_eq!("Some(Colors { attrs: , fg: Rgb(204, 204, 204), bg: None, \
+        fg_code: \"\\u{1b}[38;5;188m\", bg_code: \"\" })",
+        format!("{:?}", r.line_colors()));
+}
+
 
 
 // from toml: https://github.com/alexcrichton/toml-rs/blob/master/src/lib.rs

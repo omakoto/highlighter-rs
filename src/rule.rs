@@ -117,7 +117,7 @@ impl PcreEx {
                     ret.push((m.group_start(i), m.group_end(i)))
                 }
             };
-            if (cc == 0) {
+            if cc == 0 {
                 pusher(0);
             } else {
                 for i in 1..(cc + 1) {
