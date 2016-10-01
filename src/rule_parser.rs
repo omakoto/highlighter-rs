@@ -265,6 +265,10 @@ impl RuleParser {
         Err(RuleError::new(&format!("Missing key '{}'.", key)))
     }
 
+    pub fn parse_from_args(&mut self, filename: &Vec<String>) -> Result<Vec<Rule>, RuleError> {
+        unimplemented!();
+    }
+
     pub fn parse(&mut self, filename: &String) -> Result<Vec<Rule>, RuleError> {
         debug!("Reading rule file from {}...", filename);
 

@@ -34,36 +34,46 @@ fn error(message: &String) {
 //     error(&opts.usage(&format!("Usage: {} CONFIG [Files...]", program)));
 // }
 
+const FLAG_AUTO_FLUSH: &'static str = "auto-flush ";
+const FLAG_BASHCOMP: &'static str = "bash-completion ";
+const FLAG_PATTERN: &'static str = "pattern ";
+const FLAG_RULEFILE: &'static str = "rulefile ";
+const FLAG_WIDTH: &'static str = "width ";
+const FLAG_FILES: &'static str = "files ";
+
 fn get_app<'a, 'b>() -> App<'a, 'b> {
     App::new("Hilighter")
         .version("0.1")
         .author("Makoto Onuki <makoto.onuki@gmail.com>")
         .about("Regex based text highlighter")
-        .arg(Arg::with_name("rulefile")
+        .arg(Arg::with_name(FLAG_PATTERN)
+            .short("p")
+            .long(FLAG_PATTERN)
+            .takes_value(true)
+            .multiple(true)
+            .help("Specify [pattern]=[color]"))
+        .arg(Arg::with_name(FLAG_RULEFILE)
             .short("r")
             .long("rule")
             .takes_value(true)
-            .required_unless("bashcomp")
+            .required_unless(FLAG_PATTERN)
+            .required_unless(FLAG_BASHCOMP)
             .help("Specify rule file"))
         .arg(Arg::with_name("autoflush")
             .short("f")
             .long("auto-flush")
             .help("Auto-flush stdout"))
-        .arg(Arg::with_name("multithread")
-            .short("m")
-            .long("multi-thread")
-            .help("Utilize multi-cores"))
-        .arg(Arg::with_name("bashcomp")
+        .arg(Arg::with_name(FLAG_BASHCOMP)
             .long("bash-completion")
             .help("Print bash completion script"))
-        .arg(Arg::with_name("width")
+        .arg(Arg::with_name(FLAG_WIDTH)
             .short("w")
-            .long("width")
+            .long(FLAG_WIDTH)
             .default_value("80")
             .min_values(1)
             .takes_value(true)
             .help("Set width for pre/post lines"))
-        .arg(Arg::with_name("files")
+        .arg(Arg::with_name(FLAG_FILES)
             .index(1)
             .required(false)
             .multiple(true)
@@ -129,7 +139,7 @@ fn main() {
     env_logger::init().unwrap();
 
     let matches = get_app().get_matches();
-    if matches.is_present("bashcomp") {
+    if matches.is_present(FLAG_BASHCOMP) {
         get_app().gen_completions_to("hl", Shell::Bash, &mut io::stdout());
         std::process::exit(0);
     }
@@ -137,13 +147,18 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let program = &args[0];
 
-    let width = value_t!(matches, "width", usize).unwrap();
+    let width = value_t!(matches, FLAG_WIDTH, usize).unwrap();
     let auto_flush = matches.is_present("autoflush");
-    let rule_file = matches.value_of("rulefile").unwrap();
     let mut files: Vec<String> = vec![];
-    if let Some(arg_files) = matches.values_of("files") {
-        for f in arg_files {
+    if let Some(arg) = matches.values_of(FLAG_FILES) {
+        for f in arg {
             files.push(f.to_string());
+        }
+    }
+    let mut patterns: Vec<String> = vec![];
+    if let Some(arg) = matches.values_of(FLAG_PATTERN) {
+        for f in arg {
+            patterns.push(f.to_string());
         }
     }
 
@@ -152,7 +167,12 @@ fn main() {
     debug!("Detected terminal: {:?}", &term);
 
     let mut parser = RuleParser::new(term, width);
-    let rules = match parser.parse(&rule_file.to_string()) { // TODO Fix the arg type
+    let parse_result = if patterns.len() > 0 {
+        parser.parse_from_args(&patterns)
+    } else {
+        parser.parse(&(matches.value_of(FLAG_RULEFILE).unwrap()).to_string())
+    };
+    let rules = match parse_result {
         Err(e) => {
             error(&format!("{}", e));
             std::process::exit(1);
