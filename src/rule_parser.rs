@@ -326,6 +326,8 @@ impl RuleParser {
         let mut post_line: Option<String> = None;
         let mut post_line_color: Option<Colors> = None;
 
+        let push_rule
+
         let mut line_no = 0;
         for line_res in file.lines() {
             line_no += 1;
@@ -385,11 +387,17 @@ impl RuleParser {
                     rule.as_mut().unwrap().set_line_colors(c);
                 }
                 ".pre_line" => {
-                    // Grr...
+                    pre_line = value;
                 }
-                ".pre_line_color" => {}
-                ".post_line" => {}
-                ".post_line_color" => {}
+                ".pre_line_color" => {
+                    pre_line_color = try!(self.color_parser.parse(value));
+                }
+                ".post_line" => {
+                    post_line = value;
+                }
+                ".post_line_color" => {
+                    post_line_color = try!(self.color_parser.parse(value));
+                }
                 ".stop" => {
                     rule.as_mut().unwrap().set_stop(true);
                 }
