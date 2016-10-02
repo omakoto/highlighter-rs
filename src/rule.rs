@@ -222,23 +222,13 @@ impl Rule {
         self
     }
 
-    pub fn set_pre_line(&mut self,
-                        mark: String,
-                        colors: Option<Colors>,
-                        term: Term,
-                        console_width: usize)
-                        -> &mut Rule {
-        self.pre_line = Some(DecorativeLine::new(&mark, colors, term, console_width));
+    pub fn set_pre_line(&mut self, line: DecorativeLine)-> &mut Rule {
+        self.pre_line = Some(line);
         self
     }
 
-    pub fn set_post_line(&mut self,
-                         mark: String,
-                         colors: Option<Colors>,
-                         term: Term,
-                         console_width: usize)
-                         -> &mut Rule {
-        self.post_line = Some(DecorativeLine::new(&mark, colors, term, console_width));
+    pub fn set_post_line(&mut self, line: DecorativeLine) -> &mut Rule {
+        self.post_line = Some(line);
         self
     }
 

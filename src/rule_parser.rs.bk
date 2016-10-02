@@ -313,8 +313,8 @@ impl RuleParser {
         Ok(rule)
     }
 
-    fn new_decorative_line(&self, marker: &str, colors: &Option<Colors>) -> DecorativeLine {
-        DecorativeLine::new(marker, colors.clone(), self.term, self.output_width)
+    fn new_decorative_line(marker: &str, colors: &Option<Colors>) {
+DecorativeLine::new(marker, pre_line_color, self.term, self.output_width)
     }
 
     pub fn parse_legacy(&self, filename: &str, mut rules: &mut Vec<Rule>) -> Result<(), RuleError> {
@@ -339,34 +339,32 @@ impl RuleParser {
         }
 
         impl State {
-            fn new_decorative_line(&self,
-                                   p: &RuleParser,
-                                   pre_line: &Option<String>,
-                                   pre_line_color: &Option<Colors>)
-                                   -> DecorativeLine {
-                let pl = if pre_line.is_some() {
-                    pre_line.as_ref().unwrap_or(&String::new()).clone()
-                } else {
-                    String::new()
-                };
-                p.new_decorative_line(&pl, pre_line_color)
-            }
-
-            fn add_rule(&mut self, p: &RuleParser, rules: &mut Vec<Rule>) {
+            fn add_rule(&mut self, rules: &mut Vec<Rule>) {
                 if self.rule.is_none() {
                     return;
                 }
-                if self.pre_line.is_some() || self.pre_line_color.is_some() {
-                    let dl = self.new_decorative_line(p, &self.pre_line, &self.pre_line_color);
-                    self.rule.as_mut().unwrap().set_pre_line(dl);
-                }
-                if self.post_line.is_some() || self.post_line_color.is_some() {
-                    let dl = self.new_decorative_line(p, &self.post_line, &self.post_line_color);
-                    self.rule.as_mut().unwrap().set_post_line(dl);
-                }
+                // if self.pre_line.is_some() || self.pre_line_color.is_some() {
+                //     let pl = self.pre_line.unwrap_or("".to_string());
+                //     self.rule
+                //         .as_mut()
+                //         .unwrap()
+                //         .set_pre_line(pl,
+                //                       self.pre_line_color.clone(),
+                //                       self.term,
+                //                       self.output_width);
+                // }
+                // if self.post_line.is_some() || self.post_line_color.is_some() {
+                //     self.rule
+                //         .as_mut()
+                //         .unwrap()
+                //         .set_post_line(self.post_line.unwrap_or("".to_string()),
+                //                        self.post_line_color,
+                //                        self.term,
+                //                        self.output_width);
+                // }
 
                 debug!("{:?}", self.rule.as_ref());
-                rules.push(self.rule.as_ref().unwrap().clone());
+                // rules.push(self.rule.as_ref().clone());
                 self.rule = None;
                 self.pre_line = None;
                 self.pre_line_color = None;
@@ -411,7 +409,7 @@ impl RuleParser {
             debug!("  {}={}", key, value);
 
             if key == "pattern" {
-                state.add_rule(self, &mut rules);
+                state.add_rule(&mut rules);
                 state.rule = Some(try!(Rule::new(&value)));
                 continue;
             }
@@ -470,7 +468,7 @@ impl RuleParser {
                 }
             }
         }
-        state.add_rule(self, &mut rules);
+        state.add_rule(&mut rules);
         Ok(())
     }
 
@@ -593,12 +591,12 @@ impl RuleParser {
                 }
             }
             if pre_line.is_some() || pre_line_color.is_some() {
-                rule.set_pre_line(self.new_decorative_line(&pre_line.unwrap_or("".to_string()),
+                rule.set_pre_line(new_decorative_line(&pre_line.unwrap_or("".to_string()),
                                                       &pre_line_color));
             }
             if post_line.is_some() || post_line_color.is_some() {
-                rule.set_post_line(self.new_decorative_line(&post_line.unwrap_or("".to_string()),
-                                                            &post_line_color));
+                rule.set_post_line(new_decorative_line(&post_line.unwrap_or("".to_string()),
+                                                       &post_line_color));
             }
 
             debug!("rule={:?}", rule);
