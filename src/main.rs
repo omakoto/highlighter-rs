@@ -54,6 +54,7 @@ fn get_app<'a, 'b>() -> App<'a, 'b> {
             .long(FLAG_SIMPLE_RULE)
             .takes_value(true)
             .multiple(true)
+            .number_of_values(1)
             .help("Add a simple rule: RE=(colors)(@colors) \
                 e.g. '\\d+=500/222@/cyan'"))
         .arg(Arg::with_name(FLAG_RULEFILE)
@@ -61,12 +62,14 @@ fn get_app<'a, 'b>() -> App<'a, 'b> {
             .long(FLAG_RULEFILE)
             .takes_value(true)
             .multiple(true)
+            .number_of_values(1)
             .help("Specify TOML rule file"))
         .arg(Arg::with_name(FLAG_LEGACY_RULEFILE)
             .short("c")
             .long(FLAG_LEGACY_RULEFILE)
             .takes_value(true)
             .multiple(true)
+            .number_of_values(1)
             .help("Specify legacy file"))
         .arg(Arg::with_name("autoflush")
             .short("f")
@@ -138,16 +141,19 @@ fn real_main() -> Result<(), String> {
 
     if let Some(args) = matches.values_of(FLAG_RULEFILE) {
         for arg in args {
+            debug!("Loading TOML rule file {}", arg);
             try!(parser.parse_toml(arg, &mut rules).map_err(|e| e.description().to_string()));
         }
     }
     if let Some(args) = matches.values_of(FLAG_LEGACY_RULEFILE) {
         for arg in args {
+            debug!("Loading legacy rule file {}", arg);
             try!(parser.parse_legacy(arg, &mut rules).map_err(|e| e.description().to_string()));
         }
     }
     if let Some(args) = matches.values_of(FLAG_SIMPLE_RULE) {
         for arg in args {
+            debug!("Adding simple rule {}", arg);
             rules.push(try!(parser.parse_simple_rule(arg).map_err(|e| e.description().to_string())));
         }
     }
