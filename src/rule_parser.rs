@@ -339,34 +339,33 @@ impl RuleParser {
         }
 
         impl State {
-            fn new_decorative_line(&self,
-                                   p: &RuleParser,
+            fn new_decorative_line(p: &RuleParser,
                                    pre_line: &Option<String>,
                                    pre_line_color: &Option<Colors>)
                                    -> DecorativeLine {
-                let pl = if pre_line.is_some() {
-                    pre_line.as_ref().unwrap_or(&String::new()).clone()
-                } else {
-                    String::new()
-                };
+                let pl = pre_line.as_ref().unwrap_or(&String::new()).clone();
                 p.new_decorative_line(&pl, pre_line_color)
             }
 
             fn add_rule(&mut self, p: &RuleParser, rules: &mut Vec<Rule>) {
                 if self.rule.is_none() {
+                    // No previous rule.
                     return;
                 }
-                if self.pre_line.is_some() || self.pre_line_color.is_some() {
-                    let dl = self.new_decorative_line(p, &self.pre_line, &self.pre_line_color);
-                    self.rule.as_mut().unwrap().set_pre_line(dl);
-                }
-                if self.post_line.is_some() || self.post_line_color.is_some() {
-                    let dl = self.new_decorative_line(p, &self.post_line, &self.post_line_color);
-                    self.rule.as_mut().unwrap().set_post_line(dl);
-                }
+                {
+                    let rule = self.rule.as_mut().unwrap();
+                    if self.pre_line.is_some() || self.pre_line_color.is_some() {
+                        let dl = State::new_decorative_line(p, &self.pre_line, &self.pre_line_color);
+                        rule.set_pre_line(dl);
+                    }
+                    if self.post_line.is_some() || self.post_line_color.is_some() {
+                        let dl = State::new_decorative_line(p, &self.post_line, &self.post_line_color);
+                        rule.set_post_line(dl);
+                    }
 
-                debug!("{:?}", self.rule.as_ref());
-                rules.push(self.rule.as_ref().unwrap().clone());
+                    debug!("{:?}", rule);
+                    rules.push(rule.clone());
+                }
                 self.rule = None;
                 self.pre_line = None;
                 self.pre_line_color = None;
