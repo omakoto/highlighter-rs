@@ -114,11 +114,11 @@ pattern = '''^\[(system_server)'''
 color = '550/002'
 
 [[rule]]
-pattern = '''#^ \[  (  com\.google\.android\.gms[\.a-zA-Z0-9_]*  )'''
+pattern = '''(?i) ^ \[  (  com\.google\.android\.gms[\.a-zA-Z0-9_]*  )'''
 color = '550/200'
 
 [[rule]]
-pattern = '''#^ \[  (  android\.process\.acore  )'''
+pattern = '''(?i) ^ \[  (  android\.process\.acore  )'''
 color = '100/055'
 
 # Other processes
@@ -208,27 +208,27 @@ line_color = 'byellow/515'
 
 # 1 digit ms
 [[rule]]
-pattern = '''# (?: ^ | [^\d\.]) ( \d (?:\.\d+)? \s* ms\b )'''
+pattern = '''(?x) (?: ^ | [^\d\.]) ( \d (?:\.\d+)? \s* ms\b )'''
 color = '050'
 
 # 2 digit ms
 [[rule]]
-pattern = '''# (?: ^ | [^\d\.]) ( \d{2} (?:\.\d+)? \s* ms\b )'''
+pattern = '''(?x) (?: ^ | [^\d\.]) ( \d{2} (?:\.\d+)? \s* ms\b )'''
 color = '550/200'
 
 # 100-199 ms
 [[rule]]
-pattern = '''# (?: ^ | [^\d\.]) ( 1\d{2} (?:\.\d+)? \s* ms\b )'''
+pattern = '''(?x) (?: ^ | [^\d\.]) ( 1\d{2} (?:\.\d+)? \s* ms\b )'''
 color = '550/200'
 
 # 200-999 ms
 [[rule]]
-pattern = '''# (?: ^ | [^\d\.]) ( [2-9]\d{2} (?:\.\d+)? \s* ms\b )'''
+pattern = '''(?x) (?: ^ | [^\d\.]) ( [2-9]\d{2} (?:\.\d+)? \s* ms\b )'''
 color = 'b550/300'
 
 # 4+ digit ms
 [[rule]]
-pattern = '''# \d{4,} (?:\.\d+)? \s* ms\b'''
+pattern = '''(?x) \d{4,} (?:\.\d+)? \s* ms\b'''
 color = 'b552/500'
 
 #-------------------------------------------------------------------------------
