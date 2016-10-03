@@ -70,7 +70,7 @@ fn get_app<'a, 'b>() -> App<'a, 'b> {
             .takes_value(true)
             .multiple(true)
             .number_of_values(1)
-            .help("Specify legacy file"))
+            .help("Specify legacy rule file"))
         .arg(Arg::with_name("autoflush")
             .short("f")
             .long("auto-flush")
