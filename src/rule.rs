@@ -222,7 +222,7 @@ impl Rule {
         self
     }
 
-    pub fn set_pre_line(&mut self, line: DecorativeLine)-> &mut Rule {
+    pub fn set_pre_line(&mut self, line: DecorativeLine) -> &mut Rule {
         self.pre_line = Some(line);
         self
     }

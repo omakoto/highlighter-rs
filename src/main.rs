@@ -154,7 +154,8 @@ fn real_main() -> Result<(), String> {
     if let Some(args) = matches.values_of(FLAG_SIMPLE_RULE) {
         for arg in args {
             debug!("Adding simple rule {}", arg);
-            rules.push(try!(parser.parse_simple_rule(arg).map_err(|e| e.description().to_string())));
+            rules.push(try!(
+                parser.parse_simple_rule(arg).map_err(|e| e.description().to_string())));
         }
     }
 

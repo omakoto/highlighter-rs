@@ -25,8 +25,7 @@ const NO_CSI: &'static str = "";
 
 #[derive(Debug)]
 pub enum RuleError {
-    ParseError(String),
-    // IoError(String, std::io::Error),
+    ParseError(String), // IoError(String, std::io::Error),
 }
 
 impl RuleError {
@@ -97,6 +96,10 @@ impl Term {
     }
 
     pub fn csi_reset(&self) -> &'static str {
-        if *self == Term::Dumb { NO_CSI } else { CSI_RESET }
+        if *self == Term::Dumb {
+            NO_CSI
+        } else {
+            CSI_RESET
+        }
     }
 }

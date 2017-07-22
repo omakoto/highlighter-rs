@@ -203,6 +203,7 @@ pub struct RuleParser {
     color_parser: ColorParser,
     term: Term,
     output_width: usize,
+    default_color_index: i32,
 }
 
 impl RuleParser {
@@ -211,6 +212,7 @@ impl RuleParser {
             color_parser: ColorParser::new(term),
             term: term,
             output_width: output_width,
+            default_color_index: -1,
         }
     }
 
@@ -264,7 +266,7 @@ impl RuleParser {
         Err(RuleError::new(&format!("Missing key '{}'.", key)))
     }
 
-    pub fn parse_simple_rule(&self, value: &str) -> Result<Rule, RuleError> {
+    pub fn parse_simple_rule(&mut self, value: &str) -> Result<Rule, RuleError> {
         // Split with "="
         let pattern;
         let rest;
@@ -273,7 +275,18 @@ impl RuleParser {
             rest = &value[p + 1..value.len()];
         } else {
             pattern = &value;
-            rest = &"";
+            self.default_color_index += 1;
+            rest = match self.default_color_index {
+                0 => "b055@/012",
+                1 => "b550@/110",
+                2 => "b550@/101",
+                3 => "b511@/100",
+                _ => {
+                    self.default_color_index = -1;
+                    "b151@/010"
+                },
+            };
+
         }
         if pattern.len() == 0 {
             return Err(RuleError::new("Pattern can't be empty."));
@@ -355,11 +368,13 @@ impl RuleParser {
                 {
                     let rule = self.rule.as_mut().unwrap();
                     if self.pre_line.is_some() || self.pre_line_color.is_some() {
-                        let dl = State::new_decorative_line(p, &self.pre_line, &self.pre_line_color);
+                        let dl =
+                            State::new_decorative_line(p, &self.pre_line, &self.pre_line_color);
                         rule.set_pre_line(dl);
                     }
                     if self.post_line.is_some() || self.post_line_color.is_some() {
-                        let dl = State::new_decorative_line(p, &self.post_line, &self.post_line_color);
+                        let dl =
+                            State::new_decorative_line(p, &self.post_line, &self.post_line_color);
                         rule.set_post_line(dl);
                     }
 

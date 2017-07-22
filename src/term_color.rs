@@ -97,9 +97,11 @@ impl Attribute {
 #[test]
 fn test_attr_to_ansi_code() {
     assert_eq!("", ATTR_NONE.to_ansi_code(Term::Xterm));
-    assert_eq!("\x1b[1m".to_string(), ATTR_INTENSE.to_ansi_code(Term::Xterm));
+    assert_eq!("\x1b[1m".to_string(),
+               ATTR_INTENSE.to_ansi_code(Term::Xterm));
     assert_eq!("\x1b[3m".to_string(), ATTR_ITALIC.to_ansi_code(Term::Xterm));
-    assert_eq!("\x1b[4m".to_string(), ATTR_UNDERLINE.to_ansi_code(Term::Xterm));
+    assert_eq!("\x1b[4m".to_string(),
+               ATTR_UNDERLINE.to_ansi_code(Term::Xterm));
     assert_eq!("\x1b[9m".to_string(), ATTR_STRIKE.to_ansi_code(Term::Xterm));
     assert_eq!("\x1b[2m".to_string(), ATTR_FAINT.to_ansi_code(Term::Xterm));
     assert_eq!("\x1b[1;3;9m".to_string(),

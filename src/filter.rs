@@ -82,7 +82,7 @@ pub struct Filter {
 }
 
 impl Filter {
-    pub fn new(term:Term, rules: Vec<Rule>) -> Filter {
+    pub fn new(term: Term, rules: Vec<Rule>) -> Filter {
         Filter {
             term: term,
             rules: rules,
@@ -162,8 +162,8 @@ impl Filter {
 
         let line_bytes = line.as_bytes();
 
-        let mut last_fg : &Colors = &NO_COLORS;
-        let mut last_bg : &Colors  = &NO_COLORS;
+        let mut last_fg: &Colors = &NO_COLORS;
+        let mut last_bg: &Colors = &NO_COLORS;
 
         let mut in_color = false;
 
