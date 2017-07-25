@@ -1,6 +1,30 @@
 ///bin/true; exec hl -r "$0" "${@}"
 
-# fatal
+# [[rule]]
+# pattern = '''PCRE'''
+#       - Specify a pattern to look for.
+#       - If a pattern starts with !, it'll match lines that don't match the pattern.
+# color = '((PREFIX)?FORE-COLOR)?(/BACK-COLOR)?'
+#       - Specify a foreground color and a background color for the matches.
+#       - If a pattern contains no captures, then the color will be applied to the
+#         entire match.
+#       - If a pattern contains 1 or more captures, then the color will be applied
+#         only to the captured parts.
+#       - PREFIX can be [biu]+
+#           b: bold
+#           i: italic
+#           u: underline
+#       - FORE-COLOR, BACK-COLOR can be:
+#           Named color: (black|red|green|yellow|blue|magenta|cyan|white)
+#           Xterm RGB: [0-5]{3}
+#           24bit color: [0-9a-F]{6}
+# line_color = [SAME AS ABOVE]
+#       - Specify color for the entire matching lines.
+# Other options -- see below.
+
+#-------------------------------------------------------------------------------
+# Fatal lines
+#-------------------------------------------------------------------------------
 
 [[rule]]
 pattern = '''(?:\d F |\bF[\/\(])'''
