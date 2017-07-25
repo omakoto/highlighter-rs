@@ -21,4 +21,4 @@ hl -r TOML_RULE_FILE [FILES...]
 ```
 
 
-See [the sample rule file](blob/master/samples/highlighter-logcat.toml).
+See [the sample rule file](samples/highlighter-logcat.toml).
