@@ -16,9 +16,15 @@ cargo install --force
 
 ## Usage
 
+1. Using a rule file:
+
 ```
 hl -r TOML_RULE_FILE [FILES...]
 ```
 
 
 See [the sample rule file](samples/highlighter-logcat.toml).
+
+2. Using command line arguments:
+
+See the help.

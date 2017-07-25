@@ -55,8 +55,9 @@ fn get_app<'a, 'b>() -> App<'a, 'b> {
             .takes_value(true)
             .multiple(true)
             .number_of_values(1)
-            .help("Add a simple rule: RE=(colors)(@colors) \
-                e.g. '\\d+=500/222@/cyan'"))
+            .help("Add a simple rule: RE=(colors)(@colors)\n\
+                e.g. '\\d+=500/222@/cyan'\n\
+                Colors can be omitted to apply default colors."))
         .arg(Arg::with_name(FLAG_RULEFILE)
             .short("r")
             .long(FLAG_RULEFILE)
