@@ -643,17 +643,20 @@ fn test_parse_simple_rule() {
 
     let r = p.parse_simple_rule("a=").unwrap();
     assert_eq!("a", r.pattern());
-    assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Console(1), bg: None, \
-        fg_code: \"\\u{1b}[1m\\u{1b}[31m\", bg_code: \"\" })",
+    assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Rgb(255, 255, 0), \
+        bg: None, fg_code: \"\\u{1b}[1m\\u{1b}[38;5;226m\", bg_code: \"\" })",
                format!("{:?}", r.match_colors()));
-    assert_eq!("None", format!("{:?}", r.line_colors()));
+    assert_eq!("Some(Colors { attrs: , fg: None, bg: Rgb(51, 51, 0), \
+        fg_code: \"\", bg_code: \"\\u{1b}[48;5;58m\" })",
+                format!("{:?}", r.line_colors()));
 
     let r = p.parse_simple_rule("a").unwrap();
     assert_eq!("a", r.pattern());
-    assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Console(1), bg: None, \
-        fg_code: \"\\u{1b}[1m\\u{1b}[31m\", bg_code: \"\" })",
+    assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Rgb(255, 255, 0), \
+        bg: None, fg_code: \"\\u{1b}[1m\\u{1b}[38;5;226m\", bg_code: \"\" })",
                format!("{:?}", r.match_colors()));
-    assert_eq!("None", format!("{:?}", r.line_colors()));
+    assert_eq!("Some(Colors { attrs: , fg: None, bg: Rgb(51, 0, 51), \
+        fg_code: \"\", bg_code: \"\\u{1b}[48;5;53m\" })", format!("{:?}", r.line_colors()));
 
     let r = p.parse_simple_rule("a=333").unwrap();
     assert_eq!("a", r.pattern());
