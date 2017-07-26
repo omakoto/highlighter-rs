@@ -271,7 +271,7 @@ impl RuleParser {
         return match self.default_color_index {
             0 => "b055@/012",
             1 => "b550@/110",
-            2 => "b550@/101",
+            2 => "b505@/101",
             3 => "b511@/100",
             _ => {
                 self.default_color_index = -1;
@@ -650,10 +650,31 @@ fn test_parse_simple_rule() {
         fg_code: \"\", bg_code: \"\\u{1b}[48;5;58m\" })",
                 format!("{:?}", r.line_colors()));
 
+    let r = p.parse_simple_rule("b").unwrap();
+    assert_eq!("b", r.pattern());
+    assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Rgb(255, 0, 255), \
+        bg: None, fg_code: \"\\u{1b}[1m\\u{1b}[38;5;201m\", bg_code: \"\" })",
+               format!("{:?}", r.match_colors()));
+    assert_eq!("Some(Colors { attrs: , fg: None, bg: Rgb(51, 0, 51), \
+        fg_code: \"\", bg_code: \"\\u{1b}[48;5;53m\" })", format!("{:?}", r.line_colors()));
+
+    let r = p.parse_simple_rule("c").unwrap();
+    assert_eq!("c", r.pattern());
+    assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Rgb(255, 51, 51), \
+        bg: None, fg_code: \"\\u{1b}[1m\\u{1b}[38;5;203m\", bg_code: \"\" })",
+               format!("{:?}", r.match_colors()));
+    assert_eq!("Some(Colors { attrs: , fg: None, bg: Rgb(51, 0, 0), \
+        fg_code: \"\", bg_code: \"\\u{1b}[48;5;52m\" })",
+                format!("{:?}", r.line_colors()));
+
+    let r = p.parse_simple_rule("a").unwrap();
+    let r = p.parse_simple_rule("a").unwrap();
+    let r = p.parse_simple_rule("a").unwrap();
+
     let r = p.parse_simple_rule("a").unwrap();
     assert_eq!("a", r.pattern());
-    assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Rgb(255, 255, 0), \
-        bg: None, fg_code: \"\\u{1b}[1m\\u{1b}[38;5;226m\", bg_code: \"\" })",
+    assert_eq!("Some(Colors { attrs: ATTR_INTENSE, fg: Rgb(255, 0, 255), \
+        bg: None, fg_code: \"\\u{1b}[1m\\u{1b}[38;5;201m\", bg_code: \"\" })",
                format!("{:?}", r.match_colors()));
     assert_eq!("Some(Colors { attrs: , fg: None, bg: Rgb(51, 0, 51), \
         fg_code: \"\", bg_code: \"\\u{1b}[48;5;53m\" })", format!("{:?}", r.line_colors()));
