@@ -266,27 +266,33 @@ impl RuleParser {
         Err(RuleError::new(&format!("Missing key '{}'.", key)))
     }
 
+    fn get_default_color(&mut self) -> &'static str {
+        self.default_color_index += 1;
+        return match self.default_color_index {
+            0 => "b055@/012",
+            1 => "b550@/110",
+            2 => "b550@/101",
+            3 => "b511@/100",
+            _ => {
+                self.default_color_index = -1;
+                "b151@/010"
+            },
+        };
+    }
+
     pub fn parse_simple_rule(&mut self, value: &str) -> Result<Rule, RuleError> {
         // Split with "="
         let pattern;
-        let rest;
+        let mut rest;
         if let Some(p) = value.rfind('=') {
             pattern = &value[0..p];
             rest = &value[p + 1..value.len()];
         } else {
             pattern = &value;
-            self.default_color_index += 1;
-            rest = match self.default_color_index {
-                0 => "b055@/012",
-                1 => "b550@/110",
-                2 => "b550@/101",
-                3 => "b511@/100",
-                _ => {
-                    self.default_color_index = -1;
-                    "b151@/010"
-                },
-            };
-
+            rest = "";
+        }
+        if rest.len() == 0 {
+            rest = self.get_default_color();
         }
         if pattern.len() == 0 {
             return Err(RuleError::new("Pattern can't be empty."));
