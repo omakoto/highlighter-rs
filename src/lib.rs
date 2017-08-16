@@ -73,7 +73,7 @@ pub enum Term {
 impl Term {
     pub fn detect() -> Term {
         if let Ok(v) = env::var("TERM") {
-            if v == "xterm" {
+            if v.starts_with("xterm") {
                 if let Ok(v) = env::var("XTERM_FULLCOLOR") {
                     Term::Rgb
                 } else {
