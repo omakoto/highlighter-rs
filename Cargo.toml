@@ -12,12 +12,12 @@ name = "hl"
 path = "src/main.rs"
 
 [dependencies]
-regex = "0.1"
+regex = "*"
 pcre = { git = "https://github.com/omakoto/rust-pcre" }
-bitflags = "0.7"
-toml = "0.2"
-lazy_static = "0.1"
-fileinput = "0.3"
+bitflags = "*"
+toml = "*"
+lazy_static = "*"
+fileinput = "*"
 clap = "2"
 
 log = "*"
