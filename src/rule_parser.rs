@@ -127,11 +127,11 @@ impl ColorParser {
     }
 
     fn to_color(index: Option<u8>,
-                rgb666: Option<u16>,
-                r: Option<u8>,
-                g: Option<u8>,
-                b: Option<u8>)
-                -> Color {
+                 rgb666: Option<u16>,
+                 r: Option<u8>,
+                 g: Option<u8>,
+                 b: Option<u8>)
+                 -> Color {
         if index.is_some() {
             return Color::with_index(index.unwrap());
         }

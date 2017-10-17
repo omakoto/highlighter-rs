@@ -83,8 +83,8 @@ impl PcreEx {
             orig_pattern.to_string()
         };
 
-        let re = try!(Pcre::compile(&pattern)
-            .map_err(|e| RuleError::new(&format!("Invalid regex pattern: {}", pattern))));
+        let re = Pcre::compile(&pattern)
+            .map_err(|e| RuleError::new(&format!("Invalid regex pattern: {}", pattern)))?;
 
         Ok(PcreEx {
             pattern: orig_pattern.to_string(),
@@ -174,8 +174,8 @@ impl Rule {
             return Err(RuleError::new("No pattern found"));
         }
 
-        let re = try!(PcreEx::compile(pattern)
-            .map_err(|e| RuleError::new(&format!("Invalid regex pattern: {}", pattern))));
+        let re = PcreEx::compile(pattern)
+            .map_err(|e| RuleError::new(&format!("Invalid regex pattern: {}", pattern)))?;
 
         Ok(Rule {
             re: re,
@@ -191,8 +191,8 @@ impl Rule {
     }
 
     pub fn set_when(&mut self, pattern: String) -> Result<&mut Rule, RuleError> {
-        let re = try!(PcreEx::compile(&pattern)
-            .map_err(|e| RuleError::new(&format!("Invalid regex pattern: {}", pattern))));
+        let re = PcreEx::compile(&pattern)
+            .map_err(|e| RuleError::new(&format!("Invalid regex pattern: {}", pattern)))?;
         self.when_re = Some(re);
         Ok(self)
     }
