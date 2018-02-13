@@ -280,7 +280,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="1360" y="3" width="2480" height="1931" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27092975" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
