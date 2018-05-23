@@ -1,29 +1,22 @@
 #[macro_use]
-extern crate log;
+extern crate clap;
 extern crate env_logger;
 extern crate fileinput;
 extern crate highlighter;
 #[macro_use]
-extern crate clap;
+extern crate log;
 
-use clap::{Arg, App, SubCommand, Shell};
-use std::cmp::max;
-use std::io;
-use std::io::BufReader;
-use std::io::prelude::*;
-use std::env;
-use std::sync::mpsc::*;
-use std::thread;
-use std::sync::*;
-use std::error::Error;
-
+use clap::{App, Arg, Shell, SubCommand};
 use fileinput::FileInput;
-
 use highlighter::*;
-use highlighter::rule::*;
-use highlighter::term_color::*;
-use highlighter::rule_parser::*;
 use highlighter::filter::*;
+use highlighter::rule::*;
+use highlighter::rule_parser::*;
+use highlighter::term_color::*;
+use std::env;
+use std::io::BufReader;
+use std::io::Read;
+use std::io;
 
 fn error(message: &String) {
     writeln!(&mut std::io::stderr(),
@@ -31,10 +24,6 @@ fn error(message: &String) {
              env::args().nth(0).unwrap(),
              message);
 }
-
-// fn print_usage(program: &str, opts: &Options) {
-//     error(&opts.usage(&format!("Usage: {} CONFIG [Files...]", program)));
-// }
 
 const FLAG_AUTO_FLUSH: &'static str = "auto-flush";
 const FLAG_BASHCOMP: &'static str = "bash-completion";
