@@ -37,7 +37,7 @@ impl LayeredColors {
 
     fn colors_inner(&self, fg: bool) -> &Colors {
         let mut cur: &LayeredColors = self;
-        while (cur.colors.get_color(fg) == Color::None) && cur.back.is_some() {
+        while (cur.colors.get_color(fg) ==  Color::None) && cur.back.is_some() {
             let back_ref: &Option<Box<LayeredColors>> = &cur.back;
             let back_some: &Box<LayeredColors> = back_ref.as_ref().unwrap();
             cur = back_some;
